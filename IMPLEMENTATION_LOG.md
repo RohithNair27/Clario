@@ -243,3 +243,81 @@ Current status is healthy and demo-ready:
 - Added/kept clear comments around decision logic for easier future AI replacement.
 - Validation:
   - Ran local Node sanity checks across all required cases and confirmed varied outputs.
+
+## 11) Frontend UI Polish for Demo
+
+- Polished frontend visual design while preserving existing functionality:
+  - improved spacing, typography, and card hierarchy
+  - cleaner centered layout for laptop demo presentation
+- Upgraded hero/title area in `frontend/src/App.jsx`:
+  - added branded kicker (`Clario Demo`)
+  - improved section headings and subtitles for clearer flow
+- Enhanced upload + CTA treatment:
+  - refined upload card visuals and hover feedback
+  - made `Analyze Files` button more prominent with polished styling
+- Improved states:
+  - stronger loading/disabled button styling
+  - clearer inline error message styling
+- Improved analysis scanability in `frontend/src/components/AnalysisResults.jsx`:
+  - structured labels for original/renamed file names
+  - category displayed as a badge
+  - confidence shown as a percentage
+- Improved folder tree readability in `frontend/src/components/FolderTree.jsx`:
+  - clearer folder/file distinction with subtle emoji icons
+  - folder pill styling for hierarchy clarity
+- Validation:
+  - `npm run lint` passes
+  - `npm run build` passes
+
+## 12) Organization Mode Selector (Frontend)
+
+- Added a mode selector UI in `frontend/src/App.jsx` near the upload/analyze controls.
+- Supported selectable modes:
+  - `general`
+  - `school`
+  - `job-search`
+- Added `mode` state and wired it into analyze payload generation:
+  - `buildAnalyzePayload(...).mode` now uses selected mode
+- Kept existing flow intact:
+  - file selection -> `/analyze` -> `/organize` -> folder preview render
+- Added helper text so mode intent is visible and explicit in the UI.
+- Styled selector/helper to match polished design in `frontend/src/App.css`.
+- Validation:
+  - `npm run lint` passes
+  - `npm run build` passes
+
+## 13) Automatic Categorization Refactor (No User Mode)
+
+- Removed user-facing mode selection from frontend:
+  - deleted mode dropdown UI and related helper text/state in `frontend/src/App.jsx`
+  - removed mode-specific styling from `frontend/src/App.css`
+- Added new upload helper line in UI:
+  - "Clario automatically detects file themes and groups similar files together."
+- Refactored frontend analyze payload text heuristics for mixed uploads:
+  - resume/cv
+  - notes/lecture/assignment
+  - recipe/pasta/cake/cooking
+  - receipt/invoice/bill/payment
+  - flight/hotel/itinerary/boarding
+  - screenshot/image/photo
+  - passport/license/id/statement
+  - fallback general content
+- Refactored backend analysis flow to auto-infer category without mode dependency:
+  - updated `backend/server.js` `/analyze` to use files-only input
+  - kept response shape stable (`count`, `results`)
+- Upgraded `backend/services/mockAi.js` to return richer automatic categories:
+  - Job Search
+  - Academics
+  - Recipes
+  - Finance / Receipts
+  - Travel
+  - Screenshots / Images
+  - Personal Documents
+  - General
+- Updated `ai/analyzer.js` to match the same auto-categorization direction and categories.
+- Preserved existing functionality:
+  - select files -> analyze -> organize -> render results + folder preview
+  - loading and error handling unchanged
+- Validation:
+  - `frontend`: `npm run lint` and `npm run build` pass
+  - `backend`: mixed-file `/analyze` test returns believable varied outputs across all target categories

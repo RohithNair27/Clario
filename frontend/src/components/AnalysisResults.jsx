@@ -8,16 +8,14 @@ function AnalysisResults({ results }) {
     <div className="results-list">
       {results.map((item) => (
         <article key={item.original_name || item.new_name} className="result-card">
-          <p className="result-meta">
-            <strong>Original:</strong> {item.original_name}
-          </p>
+          <p className="result-label">Original</p>
+          <p className="result-meta">{item.original_name}</p>
+          <p className="result-label">Renamed To</p>
           <p className="result-name">{item.new_name}</p>
-          <p className="result-category">
-            <strong>Category:</strong> {item.category}
-          </p>
+          <p className="result-category">{item.category}</p>
           <p className="result-summary">{item.summary}</p>
           <p className="result-meta">
-            <strong>Confidence:</strong> {item.confidence}
+            <strong>Confidence:</strong> {Math.round((item.confidence || 0) * 100)}%
           </p>
           <p className="result-meta">
             <strong>Reasoning:</strong> {item.reasoning}

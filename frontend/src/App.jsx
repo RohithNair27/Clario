@@ -26,9 +26,56 @@ function App() {
   // Placeholder text mapping until real OCR/text extraction is connected.
   const getPlaceholderText = (fileName) => {
     const lowerName = fileName.toLowerCase()
-    if (lowerName.includes('resume')) return 'Software engineering resume content'
-    if (lowerName.includes('notes')) return 'Distributed systems lecture notes'
-    return 'General document content'
+    if (lowerName.includes('resume') || lowerName.includes('cv')) {
+      return 'software engineering resume content'
+    }
+    if (
+      lowerName.includes('notes') ||
+      lowerName.includes('lecture') ||
+      lowerName.includes('assignment')
+    ) {
+      return 'academic course notes and study material'
+    }
+    if (
+      lowerName.includes('recipe') ||
+      lowerName.includes('pasta') ||
+      lowerName.includes('cake') ||
+      lowerName.includes('cooking')
+    ) {
+      return 'recipe instructions ingredients and cooking steps'
+    }
+    if (
+      lowerName.includes('receipt') ||
+      lowerName.includes('invoice') ||
+      lowerName.includes('bill') ||
+      lowerName.includes('payment')
+    ) {
+      return 'transaction receipt and payment details'
+    }
+    if (
+      lowerName.includes('flight') ||
+      lowerName.includes('hotel') ||
+      lowerName.includes('itinerary') ||
+      lowerName.includes('boarding')
+    ) {
+      return 'travel booking and itinerary information'
+    }
+    if (
+      lowerName.includes('screenshot') ||
+      lowerName.includes('image') ||
+      lowerName.includes('photo')
+    ) {
+      return 'screenshot or image content'
+    }
+    if (
+      lowerName.includes('passport') ||
+      lowerName.includes('license') ||
+      lowerName.includes('id') ||
+      lowerName.includes('statement')
+    ) {
+      return 'personal document information'
+    }
+    return 'general document content'
   }
 
   // Converts browser File objects into backend /analyze payload shape.
@@ -38,7 +85,6 @@ function App() {
       type: file.type || 'unknown',
       text: getPlaceholderText(file.name),
     })),
-    mode: 'general',
   })
 
   // Analyze files first, then ask backend to generate folder organization preview.
@@ -91,11 +137,19 @@ function App() {
   return (
     <main className="app">
       <header className="hero">
+        <p className="hero-kicker">Clario Demo</p>
         <h1>Clario</h1>
         <p>AI-powered file organizer</p>
       </header>
 
       <section className="card">
+        <h2>Upload</h2>
+        <p className="section-subtitle">
+          Select files and run AI analysis to preview smart naming and folders.
+        </p>
+        <p className="mode-helper">
+          Clario automatically detects file themes and groups similar files together.
+        </p>
         <UploadBox onFilesSelected={setSelectedFiles} />
         <button
           className="analyze-button"
@@ -110,18 +164,21 @@ function App() {
 
       <section className="grid">
         <div className="card">
-          <h2>Before</h2>
+          <h2>Before: Selected Files</h2>
+          <p className="section-subtitle">{originalFiles.length} file(s) selected</p>
           <FileList files={originalFiles} />
         </div>
 
         <div className="card">
-          <h2>After</h2>
+          <h2>After: AI Analysis</h2>
+          <p className="section-subtitle">Renaming suggestions, categories, and reasoning</p>
           <AnalysisResults results={analysisResults} />
         </div>
       </section>
 
       <section className="card">
         <h2>Folder Tree Preview</h2>
+        <p className="section-subtitle">Backend-generated organization structure</p>
         {folderTreeData ? (
           <FolderTree tree={folderTreeData} />
         ) : (

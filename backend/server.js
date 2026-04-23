@@ -17,9 +17,9 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Analyze route: accepts files + mode and returns per-file mock AI output.
+// Analyze route: accepts files and auto-detects themes per file.
 app.post("/analyze", (req, res) => {
-  const { files = [], mode = "general" } = req.body;
+  const { files = [] } = req.body;
 
   if (!Array.isArray(files)) {
     return res.status(400).json({
@@ -27,10 +27,9 @@ app.post("/analyze", (req, res) => {
     });
   }
 
-  const analysis = analyzeFiles(files, mode);
+  const analysis = analyzeFiles(files);
 
   return res.json({
-    mode,
     count: analysis.length,
     results: analysis,
   });
