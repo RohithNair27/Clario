@@ -1,6 +1,7 @@
 // Minimal Express server for Clario's backend API.
 const express = require("express");
 const cors = require("cors");
+const { analyzeFiles, buildFolderPreview } = require("./services/mockAi");
 
 const app = express();
 const PORT = 3001;
@@ -14,6 +15,43 @@ app.use(express.json());
 // Basic health check endpoint to verify server is running.
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
+});
+
+// Analyze route: accepts files + mode and returns per-file mock AI output.
+app.post("/analyze", (req, res) => {
+  const { files = [], mode = "general" } = req.body;
+
+  if (!Array.isArray(files)) {
+    return res.status(400).json({
+      error: "Invalid payload. 'files' must be an array.",
+    });
+  }
+
+  const analysis = analyzeFiles(files, mode);
+
+  return res.json({
+    mode,
+    count: analysis.length,
+    results: analysis,
+  });
+});
+
+// Organize route: accepts analyzed files and returns folder tree preview.
+app.post("/organize", (req, res) => {
+  const { analyzed_files: analyzedFiles = [] } = req.body;
+
+  if (!Array.isArray(analyzedFiles)) {
+    return res.status(400).json({
+      error: "Invalid payload. 'analyzed_files' must be an array.",
+    });
+  }
+
+  const preview = buildFolderPreview(analyzedFiles);
+
+  return res.json({
+    status: "ok",
+    preview,
+  });
 });
 
 app.listen(PORT, () => {

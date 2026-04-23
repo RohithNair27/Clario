@@ -1,8 +1,165 @@
-/* Minimal styling for the frontend placeholder UI. */
+/* Main page layout for a clean hackathon demo UI. */
 .app {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 20px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #0f172a;
+}
+
+.hero {
+  text-align: left;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.hero p {
+  margin-top: 8px;
+  color: #475569;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.upload-box {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 36px 18px;
   text-align: center;
-  font-family: Arial, sans-serif;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.upload-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.upload-subtitle {
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.analyze-button {
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analyze-button:hover {
+  background: #1d4ed8;
+}
+
+.analyze-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-text {
+  margin-top: 10px;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.file-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.results-list {
+  display: grid;
+  gap: 10px;
+}
+
+.result-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.result-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.result-category {
+  margin: 4px 0;
+  color: #1d4ed8;
+  font-size: 0.9rem;
+}
+
+.result-summary {
+  margin: 0;
+  color: #475569;
+  font-size: 0.92rem;
+}
+
+.result-meta {
+  margin: 4px 0;
+  color: #334155;
+  font-size: 0.88rem;
+}
+
+.folder-tree ul {
+  margin: 8px 0 0 16px;
+  padding: 0;
+}
+
+.tree-root {
+  margin: 0;
+  font-weight: 700;
+}
+
+.tree-folder {
+  margin: 6px 0;
+  font-weight: 600;
+}
+
+.tree-file {
+  margin: 4px 0;
+  color: #475569;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
