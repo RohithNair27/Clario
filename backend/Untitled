@@ -1,4 +1,0 @@
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-USE_LLM_ANALYZER=true
-CLAUDE_MODEL=claude-sonnet-4-20250514
-PORT=3001
