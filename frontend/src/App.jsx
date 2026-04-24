@@ -30,6 +30,7 @@ const SUPPORTED_TEXT_EXTENSIONS = [
 ]
 const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff']
 const UNSUPPORTED_EXTENSIONS = ['exe', 'zip', 'mp4', 'mp3', 'psd', 'ai']
+const PDF_FALLBACK_TEXT = 'PDF document content (text extraction unavailable)'
 
 const buildDefaultZipNameFromDate = () => {
   const now = new Date()
@@ -128,13 +129,23 @@ function App() {
   }
 
   // Normalizes backend /organize response into the tree shape used by FolderTree.
-  const mapOrganizePreviewToTree = (preview) => ({
-    name: preview?.root || 'Clario Workspace',
-    children: (preview?.folders || []).map((folder) => ({
-      name: folder.name,
-      children: folder.files || [],
-    })),
-  })
+  // Ensures preview always displays AI-renamed file names.
+  const mapOrganizePreviewToTree = (preview, results = []) => {
+    const newNameByOriginal = {}
+    results.forEach((result) => {
+      if (result?.original_name && result?.new_name) {
+        newNameByOriginal[result.original_name] = result.new_name
+      }
+    })
+
+    return {
+      name: preview?.root || 'Clario Workspace',
+      children: (preview?.folders || []).map((folder) => ({
+        name: folder.name,
+        children: (folder.files || []).map((fileName) => newNameByOriginal[fileName] || fileName),
+      })),
+    }
+  }
 
   const mapFoldersToOriginalName = (preview, results = []) => {
     const folderByFile = {}
@@ -270,12 +281,10 @@ function App() {
       if (pages.length > 0) {
         return pages.join('\n')
       }
+      return `${PDF_FALLBACK_TEXT}: ${file.name}`
     } catch (pdfError) {
-      throw new Error(
-        `Could not read PDF "${file.name}". The file may be corrupted or unsupported.`
-      )
+      return `${PDF_FALLBACK_TEXT}: ${file.name}`
     }
-    throw new Error(`PDF "${file.name}" contains no readable text content.`)
   }
 
   const readDocLikeText = async (file) => {
@@ -455,7 +464,7 @@ function App() {
           'organized-files',
       }))
       setAnalysisResults(enrichedResults)
-      setFolderTreeData(mapOrganizePreviewToTree(organizeData.preview))
+      setFolderTreeData(mapOrganizePreviewToTree(organizeData.preview, enrichedResults))
     } catch (requestError) {
       const msg = requestError.message || 'Failed to process files. Please try again.'
       setError(msg)
@@ -478,19 +487,21 @@ function App() {
       // Build a lookup map: "name_size" → category from analysis results.
       // selectedFiles still holds the original File objects in RAM.
       const categoryMap = {}
+      const renamedMap = {}
       analysisResults.forEach((result) => {
         // Match the file in selectedFiles to get its size for the key.
         const match = selectedFiles.find((f) => f.name === result.original_name)
         if (match) {
           const key = `${match.name}_${match.size}`
           categoryMap[key] = result.assigned_folder || result.category || 'organized-files'
+          renamedMap[key] = toZipSafeFileName(result.new_name || match.name)
         }
       })
 
       selectedFiles.forEach((file) => {
         const key = `${file.name}_${file.size}`
         const folder = toZipSafeFolder(categoryMap[key] || 'organized-files')
-        const zipFileName = toZipSafeFileName(file.name)
+        const zipFileName = renamedMap[key] || toZipSafeFileName(file.name)
         // Single-level ZIP layout: root/folder/file only.
         zip.folder(folder).file(zipFileName, file, { date: new Date(file.lastModified) })
       })

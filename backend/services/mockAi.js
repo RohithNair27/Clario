@@ -423,7 +423,7 @@ function extractAnthropicTextPayload(data) {
 }
 
 async function callClaudeWithRetry(requestBody, { timeoutMs = 25000, retries = 1 } = {}) {
-  const claudeKey = process.env.CLAUDE_API_KEY;
+  const claudeKey = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY;
   if (!claudeKey) return null;
 
   let lastError = null;
@@ -472,7 +472,7 @@ let cachedModelList = null;
 let cachedModelListAtMs = 0;
 
 async function fetchAvailableClaudeModels() {
-  const claudeKey = process.env.CLAUDE_API_KEY;
+  const claudeKey = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY;
   if (!claudeKey) return [];
 
   const now = Date.now();
@@ -631,7 +631,7 @@ async function analyzeFileWithLLM(fileName = "", fileType = "", extractedText = 
       ? "This is an image. Return scene_description plus strong visual keywords/entities."
       : "This is a text-oriented file. Return summary/keywords/entities from content.",
   };
-  if (process.env.CLAUDE_API_KEY) {
+  if (process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY) {
     const preferredModel = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
     const modelCandidates = await resolveClaudeModelCandidates(preferredModel);
     const preparedImage = await preprocessVisionPayload(imageData, mediaType);
@@ -683,7 +683,7 @@ async function analyzeFileWithLLM(fileName = "", fileType = "", extractedText = 
     return validated;
   }
 
-  console.error("[analyzer] CLAUDE_API_KEY not available in backend process env.");
+  console.error("[analyzer] Claude API key not available (expected CLAUDE_API_KEY or ANTHROPIC_API_KEY).");
 
   return null;
 }
@@ -748,7 +748,7 @@ function normalizeGroupingForStability(grouping) {
 }
 
 async function groupFilesWithLLM(analyzedFiles = []) {
-  const claudeKey = process.env.CLAUDE_API_KEY;
+  const claudeKey = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY;
   if (!claudeKey || analyzedFiles.length === 0) return null;
 
   const preferredModel = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
@@ -783,20 +783,17 @@ async function groupFilesWithLLM(analyzedFiles = []) {
  */
 async function analyzeFile(fileName = "", fileType = "", extractedText = "", imageData = "", mediaType = "") {
   const useLLM = process.env.USE_LLM_ANALYZER !== "false";
-
-  if (useLLM) {
-    try {
-      const llmResult = await analyzeFileWithLLM(fileName, fileType, extractedText, imageData, mediaType);
-      if (llmResult) {
-        return llmResult;
-      }
-      console.error("[analyzer] LLM enabled but no valid structured response. Falling back to rules.");
-    } catch (error) {
-      console.error("[analyzer] LLM analysis failed. Falling back to rules.", error.message);
-    }
+  if (!useLLM) {
+    throw new Error("LLM analyzer is disabled. Set USE_LLM_ANALYZER=true to use Claude-only analysis.");
   }
 
-  return analyzeFileWithRules(fileName, fileType, extractedText);
+  const llmResult = await analyzeFileWithLLM(fileName, fileType, extractedText, imageData, mediaType);
+  if (!llmResult) {
+    throw new Error(
+      `Claude-only analysis failed for "${fileName}". Check API key/model and ensure Claude returns valid JSON.`
+    );
+  }
+  return llmResult;
 }
 
 async function analyzeFiles(files = []) {
